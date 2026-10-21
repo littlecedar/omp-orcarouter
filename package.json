@@ -1,0 +1,25 @@
+{
+  "name": "omp-orcarouter",
+  "version": "0.1.0",
+  "description": "OrcaRouter provider plugin for omp (Oh My Pi): live OpenAI-compatible model catalog, login, and refresh.",
+  "type": "module",
+  "keywords": ["oh-my-pi", "omp", "orcarouter", "provider", "openai-compatible"],
+  "files": ["src", "README.md"],
+  "packageManager": "bun@1.4.3",
+  "scripts": {
+    "test": "BUN_BE_BUN=1 omp test",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check --error-on-warnings .",
+    "format": "biome check --write .",
+    "check": "tsc --noEmit && biome check --error-on-warnings ."
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.15",
+    "@oh-my-pi/pi-coding-agent": "18.12.5",
+    "@types/bun": "1.4.3",
+    "typescript": "7.0.2"
+  },
+  "omp": {
+    "extensions": ["./src/extension.ts"]
+  }
+}
