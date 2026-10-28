@@ -67,16 +67,24 @@ providers:
 
 ## Verification
 
-Install the dev-only toolchain once, then run the gates from the repository root:
+The dev-time gates run in a dev container, so the host needs no Bun, node, or npm install. The container pins Bun 1.4.3 (matching `packageManager` and CI), and `node_modules` lives in a named Docker volume (`omp-orcarouter-node_modules`), so no dependencies land in the checkout — Docker creates only an empty, gitignored `node_modules/` mountpoint there when the container starts; the workspace itself is bind-mounted, so edits made on the host appear live in the container (`./scripts/dc` runs as the container's uid 1000, which may deny in-container writes to the checkout when the host uid differs).
+
+Build the container once from the repository root; `updateContentCommand` installs the dev-only toolchain into the volume before `up` returns:
 
 ```bash
-BUN_BE_BUN=1 omp install          # devDependencies only; the plugin still ships as source
-BUN_BE_BUN=1 omp test
-BUN_BE_BUN=1 omp run typecheck    # tsc --noEmit against the host's own declarations
-BUN_BE_BUN=1 omp run lint         # biome check
+./scripts/dc up
 ```
 
-`BUN_BE_BUN=1 omp run check` runs the typecheck and lint together.
+Then run the gates:
+
+```bash
+./scripts/dc exec bun test
+./scripts/dc exec bun run typecheck    # tsc --noEmit against the host's own declarations
+./scripts/dc exec bun run lint         # biome check
+./scripts/dc exec bun run check        # typecheck + lint together
+```
+
+`scripts/dc` runs the official `@devcontainers/cli` in a cached helper image (`.devcontainer/cli.Dockerfile`), so `devcontainer.json` stays the single source of truth and the host needs no node install. VS Code or Cursor users can instead pick "Reopen in Container" and run the same `bun …` commands in the container terminal; it also maps the container user to your UID, so in-container edits and commits work there. After changing `devDependencies`, run `./scripts/dc exec bun install` to refresh `bun.lock` and the volume, then commit `bun.lock`; `updateContentCommand` only runs when the container is created.
 
 Exercise the live public catalog without touching user plugin state or the user model cache:
 

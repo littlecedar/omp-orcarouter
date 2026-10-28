@@ -1,0 +1,36 @@
+{
+	// Dev container for omp-orcarouter. All dev-time gates run here, so the
+	// host needs no Bun/node install. node_modules lives in a named volume, so
+	// the checkout stays clean (the workspace itself is bind-mounted).
+	"name": "omp-orcarouter",
+	"build": {
+		"dockerfile": "Dockerfile",
+		// The image pre-creates the default workspace mountpoint, so a fresh
+		// volume inherits bun-owned node_modules. Passing the basename keeps
+		// that path correct for clones and worktrees with other directory names.
+		"args": { "WORKSPACE_BASENAME": "${localWorkspaceFolderBasename}" }
+	},
+	"remoteUser": "bun",
+	// Docker seeds an empty named volume from the image, ownership included, so
+	// node_modules arrives owned by bun with no chown step.
+	"mounts": [
+		{
+			"type": "volume",
+			"source": "omp-orcarouter-node_modules",
+			"target": "${containerWorkspaceFolder}/node_modules"
+		}
+	],
+	// Install before `up` returns, and rerun whenever the CLI sees updated
+	// content (bun.lock included); waitFor is what makes `up` block on it.
+	"updateContentCommand": "bun install --frozen-lockfile",
+	"waitFor": "updateContentCommand",
+	"customizations": {
+		"vscode": {
+			"extensions": ["biomejs.biome", "oven.bun-vscode"],
+			"settings": {
+				"editor.defaultFormatter": "biomejs.biome",
+				"editor.formatOnSave": true
+			}
+		}
+	}
+}

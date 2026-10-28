@@ -7,7 +7,7 @@
   "files": ["src", "README.md"],
   "packageManager": "bun@1.4.3",
   "scripts": {
-    "test": "BUN_BE_BUN=1 omp test",
+    "test": "bun test",
     "typecheck": "tsc --noEmit",
     "lint": "biome check --error-on-warnings .",
     "format": "biome check --write .",

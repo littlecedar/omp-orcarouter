@@ -1,0 +1,30 @@
+#!/bin/sh
+# Runs the official devcontainer CLI in a cached helper image. The host has
+# docker but no node/npm/devcontainer CLI, and devcontainer.json stays the
+# single source of truth for the container: this only supplies the CLI.
+set -eu
+
+self=$0
+if [ -L "$self" ]; then self=$(readlink -f -- "$self"); fi
+repo=$(CDPATH= cd -- "$(dirname -- "$self")/.." && pwd)
+image=omp-orcarouter-dccli:0.89.0
+
+if [ "$#" -eq 0 ]; then
+	echo "usage: $0 <verb> [args...]   e.g. $0 up | $0 exec bun test" >&2
+	exit 2
+fi
+verb=$1
+shift
+
+if ! docker image inspect "$image" >/dev/null 2>&1; then
+	docker build -q -t "$image" -f "$repo/.devcontainer/cli.Dockerfile" "$repo/.devcontainer" >/dev/null
+fi
+
+# -i always, -t only on a TTY. Host paths are mounted verbatim so the CLI's
+# path arithmetic for the workspace bind mount matches the host exactly.
+if [ -t 1 ]; then tty=-t; else tty=; fi
+exec docker run --rm -i $tty --network host \
+	-v /var/run/docker.sock:/var/run/docker.sock \
+	-v /usr/bin/docker:/usr/local/bin/docker:ro \
+	-v "$repo:$repo" -w "$repo" \
+	"$image" devcontainer "$verb" --workspace-folder "$repo" "$@"
