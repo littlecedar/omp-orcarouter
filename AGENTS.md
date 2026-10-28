@@ -53,6 +53,11 @@ Data flow details that constrain any change:
 # host-only: load the checkout into omp as a linked plugin, then restart omp
 omp plugin link ~/src/omp-orcarouter
 
+# host-only: prove the published install path; plugin state lives under HOME,
+# not PI_CODING_AGENT_DIR (which only redirects agent config and model cache)
+h=$(mktemp -d); HOME=$h omp plugin install github:littlecedar/omp-orcarouter
+HOME=$h omp plugin list
+
 # host-only: probe the live public catalog without touching user state or the model cache
 ORCAROUTER_API_KEY=sk-orca-verification-dummy \
 PI_CODING_AGENT_DIR="$(mktemp -d)" \
@@ -94,8 +99,9 @@ omp -p --model orcarouter/openai/gpt-4o "Reply with OK"
 | `.github/workflows/ci.yml` | CI job: Bun 1.4.3, `bun install --frozen-lockfile`, `bun run check`, `bun test`. |
 | `.devcontainer/devcontainer.json` | Container definition: `oven/bun:1.4.3` build from `.devcontainer/Dockerfile` with `WORKSPACE_BASENAME` as a build arg, `remoteUser: bun`, `updateContentCommand` install (`waitFor: updateContentCommand`), named `node_modules` volume seeded bun-owned by the image. |
 | `scripts/dc` | Host wrapper around the official `@devcontainers/cli` (`./scripts/dc up`, `./scripts/dc exec …`) in a cached helper image (`.devcontainer/cli.Dockerfile`); the host has docker but no node, so this is how the gates run. |
-| `.omp-plugin/marketplace.json` | Marketplace metadata. |
-| `README.md` | User-facing spec: auth precedence, catalog rules, cost semantics, verification. Treat it as behavioral documentation — update it when behavior changes. |
+| `.omp-plugin/marketplace.json` | Marketplace metadata: installing `omp-orcarouter@omp-orcarouter` clones this repo at `main` HEAD and loads `package.json#omp.extensions`. Relative source, so no SHA pin; the catalog `version` is what `omp plugin upgrade` compares. |
+| `LICENSE` | MIT. `package.json#license` must stay in sync with it. |
+| `README.md` | User-facing spec: install paths, auth precedence, catalog rules, cost semantics, verification. Treat it as behavioral documentation — update it when behavior changes. |
 
 Version `0.1.0` is duplicated in `package.json`, `marketplace.json` `metadata.version`, and `marketplace.json` `plugins[0].version`. Bump all three together.
 

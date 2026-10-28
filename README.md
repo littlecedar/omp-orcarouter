@@ -4,15 +4,34 @@ OrcaRouter provider plugin for omp (Oh My Pi). It registers the provider id `orc
 
 ## Install
 
-For development, link the checkout and restart omp:
+The repository is a one-plugin omp marketplace, so a user needs only `omp`:
+
+```bash
+omp plugin marketplace add littlecedar/omp-orcarouter
+omp plugin install omp-orcarouter@omp-orcarouter
+```
+
+Installing straight from Git skips the marketplace layer (that path also needs `git` on `PATH`):
+
+```bash
+omp plugin install github:littlecedar/omp-orcarouter
+```
+
+Neither path builds anything: omp imports `src/extension.ts` with its embedded Bun. Restart omp after installing, then authenticate (below).
+
+To pick up later changes, refresh the catalog and reinstall:
+
+```bash
+omp plugin marketplace update omp-orcarouter   # marketplace installs
+omp plugin upgrade omp-orcarouter@omp-orcarouter
+omp plugin upgrade omp-orcarouter              # Git installs
+```
+
+For development, link the checkout instead, then restart omp:
 
 ```bash
 omp plugin link ~/src/omp-orcarouter
 ```
-
-`omp plugin install ~/src/omp-orcarouter` also works and routes a local path to a link.
-
-The plugin has no build step. omp loads `src/extension.ts` with its embedded Bun.
 
 ## Authentication
 

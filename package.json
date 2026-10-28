@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "OrcaRouter provider plugin for omp (Oh My Pi): live OpenAI-compatible model catalog, login, and refresh.",
   "type": "module",
+  "license": "MIT",
   "keywords": ["oh-my-pi", "omp", "orcarouter", "provider", "openai-compatible"],
   "files": ["src", "README.md"],
   "packageManager": "bun@1.4.3",
